@@ -39,7 +39,7 @@ def init_db_command():
 
 
 @app.route('/dashboard')
-def index():
+def dashboard():
     """Dashboard page, displays all the links."""
     return render_template('dashboard.html')
 
