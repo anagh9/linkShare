@@ -37,6 +37,13 @@ def init_db_command():
     init_db()
     print('Initialized the database.')
 
+
+@app.route('/dashboard')
+def index():
+    """Dashboard page, displays all the links."""
+    return render_template('dashboard.html')
+
+
 @app.route('/')
 def index():
     """Main page, displays all the links."""
