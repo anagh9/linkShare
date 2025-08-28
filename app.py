@@ -44,6 +44,14 @@ def index():
     links = db.execute('SELECT * FROM links ORDER BY id DESC').fetchall()
     return render_template('index.html', links=links)
 
+@app.route('/api/delete/<int:link_id>', methods=['POST'])
+def delete_link(link_id):
+    """API endpoint to delete a link by its ID."""
+    db = get_db()
+    db.execute('DELETE FROM links WHERE id = ?', (link_id,))
+    db.commit()
+    return '', 204
+
 @app.route('/add', methods=('GET', 'POST'))
 def add():
     """Page to add a new link."""
@@ -62,4 +70,3 @@ def add():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
