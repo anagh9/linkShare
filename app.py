@@ -60,7 +60,7 @@ def delete_link(link_id):
     """API endpoint to delete a link by its ID."""
     db = get_db()
     db.execute('DELETE FROM links WHERE id = ?', (link_id,))
-    db.commit()
+    db.commit() 
     return '', 204
 
 @app.route('/add', methods=('GET', 'POST'))
