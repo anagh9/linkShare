@@ -5,7 +5,6 @@ import hmac
 import subprocess
 import sqlite3
 from flask import Flask, render_template, request, redirect, url_for, g, abort
-from decouple import config
 
 DATABASE = 'links.db'
 
@@ -88,7 +87,7 @@ def webhook():
     A webhook to automatically update the server.
     """
     # Get the secret from an environment variable
-    webhook_secret = config('WEBHOOK_SECRET')
+    webhook_secret = os.environ.get('WEBHOOK_SECRET')
     if not webhook_secret:
         return 'Internal Server Error: Secret not configured', 500
 
