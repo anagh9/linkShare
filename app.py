@@ -1,6 +1,10 @@
 # app.py
+import os
+import hashlib
+import hmac
+import subprocess
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, g
+from flask import Flask, render_template, request, redirect, url_for, g, abort
 
 DATABASE = 'links.db'
 
@@ -71,9 +75,47 @@ def add():
             db.execute('INSERT INTO links (name, url) VALUES (?, ?)', (name, url))
             db.commit()
             return redirect(url_for('index'))
-            
+
     return render_template('add.html')
 
+# app.py (add this code to the end)
+
+
+@app.route('/update_server', methods=['POST'])
+def webhook():
+    """
+    A webhook to automatically update the server.
+    """
+    # Get the secret from an environment variable
+    webhook_secret = os.environ.get('WEBHOOK_SECRET')
+    if not webhook_secret:
+        return 'Internal Server Error: Secret not configured', 500
+
+    # Verify the request signature
+    x_hub_signature = request.headers.get('X-Hub-Signature-256')
+    if not x_hub_signature:
+        abort(403)
+
+    signature_parts = x_hub_signature.split('=', 1)
+    if len(signature_parts) != 2:
+        abort(403)
+
+    algo, signature = signature_parts
+    if algo != 'sha256':
+        abort(501)  # Not implemented
+
+    mac = hmac.new(webhook_secret.encode(), msg=request.data,
+                   digestmod=hashlib.sha256)
+
+    if not hmac.compare_digest(mac.hexdigest(), signature):
+        abort(403)
+
+    # If the signature is valid, run the deployment script
+    # This runs the script in the background so the request doesn't time out
+    script_path = '/home/anagh129/linkShare/deployment_script.sh'
+    subprocess.Popen([script_path])
+
+    return 'OK'
 
 if __name__ == '__main__':
     app.run(debug=True)
